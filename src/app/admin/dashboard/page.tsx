@@ -3,6 +3,7 @@ import { supabaseAdmin } from "@/lib/supabase-admin";
 import { logout } from "../actions";
 import { createCategory, deleteCategory, deleteEvent } from "./actions";
 import { AddEventForm } from "./AddEventForm";
+import { EditLink } from "@/components/EditLink";
 import type { Category, Event } from "@/lib/types";
 import { formatEventDate } from "@/lib/format";
 
@@ -101,9 +102,7 @@ export default async function DashboardPage() {
                   </span>
                 </div>
                 <div className="admin-list-item-actions">
-                  <Link href={`/admin/dashboard/events/${event.id}/edit`} className="btn btn-ghost">
-                    Modifier
-                  </Link>
+                  <EditLink href={`/admin/dashboard/events/${event.id}/edit`} />
                   <form action={deleteEvent}>
                     <input type="hidden" name="id" value={event.id} />
                     <button type="submit" className="btn btn-danger">

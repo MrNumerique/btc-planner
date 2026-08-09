@@ -408,6 +408,11 @@ footer.site-footer strong {
   animation: spin 0.7s linear infinite;
 }
 
+.spinner-dark {
+  border-color: rgba(58, 90, 122, 0.25);
+  border-top-color: var(--text-light);
+}
+
 @keyframes spin {
   to {
     transform: rotate(360deg);
