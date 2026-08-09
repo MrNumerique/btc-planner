@@ -1,5 +1,5 @@
 import type { Category, Event } from "@/lib/types";
-import { formatEventDate } from "@/lib/format";
+import { EventCard } from "@/components/EventCard";
 
 type Props = {
   categories: Category[];
@@ -35,19 +35,7 @@ export function Timeline({ categories, events }: Props) {
 
           <div className="lane-track">
             {categoryEvents.map((event) => (
-              <article key={event.id} className="event-card">
-                {event.image_url && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={event.image_url} alt="" className="event-image" />
-                )}
-                <span className="event-date">
-                  {formatEventDate(event.start_date, event.end_date)}
-                  {event.start_time ? ` · ${event.start_time.slice(0, 5)}` : ""}
-                </span>
-                <h3 className="event-title">{event.title}</h3>
-                {event.description && <p className="event-desc">{event.description}</p>}
-                {event.location && <p className="event-meta">📍 {event.location}</p>}
-              </article>
+              <EventCard key={event.id} event={event} categoryName={category.name} color={category.color} />
             ))}
           </div>
         </section>
