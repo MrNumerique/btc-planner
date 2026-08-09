@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { supabaseAdmin } from "@/lib/supabase-admin";
+import type { FormState } from "@/lib/types";
 
 function refreshPublicPages() {
   revalidatePath("/");
@@ -27,12 +28,17 @@ export async function deleteCategory(formData: FormData) {
   refreshPublicPages();
 }
 
-export async function createEvent(formData: FormData) {
+export async function createEvent(
+  _prevState: FormState,
+  formData: FormData,
+): Promise<FormState> {
   const title = String(formData.get("title") ?? "").trim();
   const categoryId = String(formData.get("category_id") ?? "");
   const startDate = String(formData.get("start_date") ?? "");
 
-  if (!title || !categoryId || !startDate) return;
+  if (!title || !categoryId || !startDate) {
+    return { status: "error", message: "Merci de remplir les champs obligatoires." };
+  }
 
   const description = String(formData.get("description") ?? "").trim() || null;
   const location = String(formData.get("location") ?? "").trim() || null;
@@ -40,7 +46,7 @@ export async function createEvent(formData: FormData) {
   const endDate = String(formData.get("end_date") ?? "").trim() || null;
   const startTime = String(formData.get("start_time") ?? "").trim() || null;
 
-  await supabaseAdmin.from("events").insert({
+  const { error } = await supabaseAdmin.from("events").insert({
     title,
     category_id: categoryId,
     start_date: startDate,
@@ -51,7 +57,12 @@ export async function createEvent(formData: FormData) {
     image_url: imageUrl,
   });
 
+  if (error) {
+    return { status: "error", message: "Erreur lors de l'ajout de l'événement." };
+  }
+
   refreshPublicPages();
+  return { status: "success", message: `« ${title} » a été ajouté au planning.` };
 }
 
 export async function updateEvent(formData: FormData) {

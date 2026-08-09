@@ -384,10 +384,34 @@ footer.site-footer strong {
   border: none;
   cursor: pointer;
   transition: transform 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .btn:hover {
   transform: translateY(-1px);
+}
+
+.btn:disabled {
+  opacity: 0.75;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: var(--white);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .btn-primary {
@@ -468,4 +492,37 @@ footer.site-footer strong {
   font-weight: 700;
   text-decoration: none;
   font-size: 0.9rem;
+}
+
+/* TOAST */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  max-width: min(360px, calc(100vw - 48px));
+  background: var(--white);
+  color: var(--text);
+  border-radius: 12px;
+  box-shadow: 0 10px 36px rgba(15, 35, 64, 0.2);
+  padding: 14px 18px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  border-left: 5px solid var(--green);
+  z-index: 100;
+  animation: toastIn 0.25s ease;
+}
+
+.toast-error {
+  border-left-color: var(--red-brick);
+}
+
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

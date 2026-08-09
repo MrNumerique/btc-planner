@@ -17,3 +17,10 @@ export type Event = {
   category_id: string;
   created_at: string;
 };
+
+export type FormState = {
+  status: "idle" | "success" | "error";
+  message: string;
+};
+
+export const initialFormState: FormState = { status: "idle", message: "" };

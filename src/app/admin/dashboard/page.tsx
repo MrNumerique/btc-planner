@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { logout } from "../actions";
-import { createCategory, deleteCategory, createEvent, deleteEvent } from "./actions";
+import { createCategory, deleteCategory, deleteEvent } from "./actions";
+import { AddEventForm } from "./AddEventForm";
 import type { Category, Event } from "@/lib/types";
 import { formatEventDate } from "@/lib/format";
 
@@ -116,57 +117,7 @@ export default async function DashboardPage() {
         </div>
 
         <h2>Ajouter un événement</h2>
-        <form action={createEvent}>
-          <div className="form-field">
-            <label htmlFor="ev-title">Titre</label>
-            <input type="text" id="ev-title" name="title" required />
-          </div>
-
-          <div className="form-field">
-            <label htmlFor="ev-category">Catégorie</label>
-            <select id="ev-category" name="category_id" required>
-              {categories.map((category) => (
-                <option key={category.id} value={category.id}>
-                  {category.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="form-row">
-            <div className="form-field">
-              <label htmlFor="ev-start">Date de début</label>
-              <input type="date" id="ev-start" name="start_date" required />
-            </div>
-            <div className="form-field">
-              <label htmlFor="ev-end">Date de fin (optionnel)</label>
-              <input type="date" id="ev-end" name="end_date" />
-            </div>
-            <div className="form-field">
-              <label htmlFor="ev-time">Heure (optionnel)</label>
-              <input type="time" id="ev-time" name="start_time" />
-            </div>
-          </div>
-
-          <div className="form-field">
-            <label htmlFor="ev-location">Lieu</label>
-            <input type="text" id="ev-location" name="location" />
-          </div>
-
-          <div className="form-field">
-            <label htmlFor="ev-desc">Description</label>
-            <textarea id="ev-desc" name="description" rows={3} />
-          </div>
-
-          <div className="form-field">
-            <label htmlFor="ev-image">URL de l&apos;image (optionnel)</label>
-            <input type="url" id="ev-image" name="image_url" />
-          </div>
-
-          <button type="submit" className="btn btn-primary">
-            Ajouter l&apos;événement
-          </button>
-        </form>
+        <AddEventForm categories={categories} />
       </div>
     </div>
   );
