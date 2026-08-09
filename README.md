@@ -1,36 +1,73 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Planning du projet
 
-## Getting Started
+Site public affichant le planning des actions d'un projet sous forme de timeline
+(une ligne par catégorie, événements classés chronologiquement), avec un back
+office protégé par mot de passe pour ajouter/modifier/supprimer les catégories
+et les événements.
 
-First, run the development server:
+Style visuel repris de [catalogue_btc](https://github.com/MrNumerique/catalogue_btc).
+
+## Stack
+
+- [Next.js](https://nextjs.org) (App Router) — frontend + back office
+- [Supabase](https://supabase.com) (Postgres gratuit) — stockage des catégories et événements
+- [Vercel](https://vercel.com) — hébergement gratuit
+
+## Mise en place
+
+### 1. Base de données Supabase
+
+1. Créer un projet sur [supabase.com](https://supabase.com) (offre gratuite).
+2. Aller dans **SQL Editor** et exécuter le contenu de [`supabase/schema.sql`](supabase/schema.sql).
+   Cela crée les tables `categories` et `events`, active la lecture publique, et
+   ajoute trois catégories de départ (Numérique, Bien-être, Mobilité).
+3. Récupérer dans **Project Settings > API** :
+   - `Project URL` → `NEXT_PUBLIC_SUPABASE_URL`
+   - `anon public` key → `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - `service_role` key → `SUPABASE_SERVICE_ROLE_KEY` (⚠️ secret, ne jamais l'exposer côté client)
+
+### 2. Variables d'environnement
+
+Copier `.env.example` vers `.env.local` et renseigner les valeurs :
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.example .env.local
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+```
+NEXT_PUBLIC_SUPABASE_URL=...
+NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+SUPABASE_SERVICE_ROLE_KEY=...
+BACKOFFICE_PASSWORD=...   # mot de passe d'accès à /admin
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. Lancer en local
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm install
+npm run dev
+```
 
-## Learn More
+- Page publique : http://localhost:3000
+- Back office : http://localhost:3000/admin
 
-To learn more about Next.js, take a look at the following resources:
+## Déploiement (Vercel, gratuit)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Pousser le projet sur un repo Git (GitHub/GitLab).
+2. Importer le repo sur [vercel.com](https://vercel.com/new).
+3. Renseigner les 4 variables d'environnement du `.env.local` dans les
+   paramètres du projet Vercel (**Settings > Environment Variables**).
+4. Déployer. Le site est servi gratuitement sur `*.vercel.app` (domaine
+   personnalisé possible).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Fonctionnement
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Page publique (`/`)** : lecture seule, une ligne par catégorie, événements
+  triés par date. Sur desktop les événements d'une catégorie défilent
+  horizontalement ; sur mobile ils s'empilent verticalement.
+- **Back office (`/admin`)** : protégé par le mot de passe `BACKOFFICE_PASSWORD`.
+  Permet de créer/supprimer des catégories (avec couleur) et de
+  créer/modifier/supprimer des événements (titre, dates, heure, lieu,
+  description, image).
+- Les écritures passent uniquement par la clé `service_role` côté serveur ;
+  la clé publique (`anon`) n'a accès qu'en lecture (RLS Supabase).

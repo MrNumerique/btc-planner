@@ -1,69 +1,72 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+import { supabase } from "@/lib/supabase";
+import { Timeline } from "@/components/Timeline";
+import type { Category, Event } from "@/lib/types";
 
-export default function Home() {
+export const revalidate = 60;
+
+async function getData(): Promise<{ categories: Category[]; events: Event[] } | null> {
+  try {
+    const [{ data: categories, error: catError }, { data: events, error: evError }] =
+      await Promise.all([
+        supabase.from("categories").select("*").order("name"),
+        supabase.from("events").select("*").order("start_date"),
+      ]);
+
+    if (catError || evError) {
+      console.error(catError ?? evError);
+      return null;
+    }
+
+    return { categories: categories ?? [], events: events ?? [] };
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
+}
+
+export default async function Home() {
+  const data = await getData();
+
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <>
+      <header className="site-header">
+        <div className="header-logo">
+          <span className="logo-badge">Notre projet</span>
+        </div>
+        <h1>
+          Le planning de <span>nos actions</span>
+        </h1>
+        <p>Retrouvez ici toutes les actions du projet, classées par catégorie.</p>
+      </header>
+
+      <svg
+        className="wave"
+        viewBox="0 0 1440 60"
+        preserveAspectRatio="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          fill="#ffffff"
+          d="M0,32 C240,64 480,0 720,16 C960,32 1200,64 1440,32 L1440,0 L0,0 Z"
         />
-        <div className={styles.intro}>
-          <h1>
-            To get started, edit the{" "}
-            <code className={styles.code}>page.tsx</code> file.
-          </h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
+      </svg>
+
+      <main>
+        {data === null ? (
+          <p className="lane-empty">
+            Le planning n&apos;est pas encore disponible. Vérifiez la configuration de la base de
+            données.
           </p>
-        </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+        ) : (
+          <Timeline categories={data.categories} events={data.events} />
+        )}
       </main>
-    </div>
+
+      <footer className="site-footer">
+        <p>
+          Planning propulsé par <strong>notre équipe projet</strong>
+        </p>
+      </footer>
+    </>
   );
 }
