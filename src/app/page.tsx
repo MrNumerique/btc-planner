@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { supabase } from "@/lib/supabase";
 import { Timeline } from "@/components/Timeline";
 import type { Category, Event } from "@/lib/types";
@@ -31,7 +32,14 @@ export default async function Home() {
     <>
       <header className="site-header">
         <div className="header-logo">
-          <span className="logo-badge">Notre projet</span>
+          <Image
+            src="/logo-btc.jpg"
+            alt="Bouge ta Campagne !"
+            width={1343}
+            height={544}
+            className="header-logo-img"
+            priority
+          />
         </div>
         <h1>
           Le planning de <span>nos actions</span>
@@ -63,8 +71,15 @@ export default async function Home() {
       </main>
 
       <footer className="site-footer">
+        <Image
+          src="/partenaires-btc.jpg"
+          alt="Nos partenaires : Gouvernement, Itinéraire Emploi, Agglo du Saint-Quentinois, Communauté de Communes du Pays du Vermandois, Val d'Oise, P.L.I.E de l'Agglo du Saint-Quentinois, Plan Local pour l'Insertion et l'Emploi, Mission Locale du Saint-Quentinois, Union européenne"
+          width={1235}
+          height={103}
+          className="partners-strip"
+        />
         <p>
-          Planning propulsé par <strong>notre équipe projet</strong>
+          Planning propulsé par <strong>Bouge ta Campagne !</strong>
         </p>
       </footer>
     </>

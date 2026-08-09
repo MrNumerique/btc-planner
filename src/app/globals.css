@@ -75,17 +75,14 @@ header.site-header::after {
   align-items: center;
   gap: 12px;
   margin-bottom: 16px;
+  position: relative;
+  z-index: 1;
 }
 
-.logo-badge {
-  background: var(--orange);
-  color: var(--white);
-  font-family: var(--font-baloo), "Baloo 2", cursive;
-  font-weight: 800;
-  font-size: 1.1rem;
-  padding: 6px 16px;
-  border-radius: 50px;
-  letter-spacing: 0.5px;
+.header-logo-img {
+  height: 72px;
+  width: auto;
+  max-width: 80vw;
 }
 
 header.site-header h1 {
@@ -265,6 +262,13 @@ footer.site-footer {
   padding: 28px 20px;
   font-size: 0.88rem;
   border-top: 3px solid var(--green);
+}
+
+.partners-strip {
+  display: block;
+  width: min(600px, 100%);
+  height: auto;
+  margin: 0 auto 16px;
 }
 
 footer.site-footer strong {
