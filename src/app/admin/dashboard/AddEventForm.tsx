@@ -63,8 +63,8 @@ export function AddEventForm({ categories }: { categories: Category[] }) {
         </div>
 
         <div className="form-field">
-          <label htmlFor="ev-image">URL de l&apos;image (optionnel)</label>
-          <input type="url" id="ev-image" name="image_url" />
+          <label htmlFor="ev-image">Image (optionnel)</label>
+          <input type="file" id="ev-image" name="image" accept="image/*" />
         </div>
 
         <button type="submit" className="btn btn-primary" disabled={isPending}>

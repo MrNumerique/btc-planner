@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { supabaseAdmin } from "@/lib/supabase-admin";
+import { uploadEventImage } from "@/lib/storage";
 import type { FormState } from "@/lib/types";
 
 function refreshPublicPages() {
@@ -42,9 +43,18 @@ export async function createEvent(
 
   const description = String(formData.get("description") ?? "").trim() || null;
   const location = String(formData.get("location") ?? "").trim() || null;
-  const imageUrl = String(formData.get("image_url") ?? "").trim() || null;
   const endDate = String(formData.get("end_date") ?? "").trim() || null;
   const startTime = String(formData.get("start_time") ?? "").trim() || null;
+
+  let imageUrl: string | null = null;
+  const imageFile = formData.get("image");
+  if (imageFile instanceof File && imageFile.size > 0) {
+    try {
+      imageUrl = await uploadEventImage(imageFile);
+    } catch (err) {
+      return { status: "error", message: (err as Error).message };
+    }
+  }
 
   const { error } = await supabaseAdmin.from("events").insert({
     title,
@@ -75,23 +85,29 @@ export async function updateEvent(formData: FormData) {
 
   const description = String(formData.get("description") ?? "").trim() || null;
   const location = String(formData.get("location") ?? "").trim() || null;
-  const imageUrl = String(formData.get("image_url") ?? "").trim() || null;
   const endDate = String(formData.get("end_date") ?? "").trim() || null;
   const startTime = String(formData.get("start_time") ?? "").trim() || null;
 
-  await supabaseAdmin
-    .from("events")
-    .update({
-      title,
-      category_id: categoryId,
-      start_date: startDate,
-      end_date: endDate,
-      start_time: startTime,
-      description,
-      location,
-      image_url: imageUrl,
-    })
-    .eq("id", id);
+  const update: Record<string, unknown> = {
+    title,
+    category_id: categoryId,
+    start_date: startDate,
+    end_date: endDate,
+    start_time: startTime,
+    description,
+    location,
+  };
+
+  const imageFile = formData.get("image");
+  if (imageFile instanceof File && imageFile.size > 0) {
+    try {
+      update.image_url = await uploadEventImage(imageFile);
+    } catch (err) {
+      redirect(`/admin/dashboard/events/${id}/edit?error=${encodeURIComponent((err as Error).message)}`);
+    }
+  }
+
+  await supabaseAdmin.from("events").update(update).eq("id", id);
 
   refreshPublicPages();
   redirect("/admin/dashboard");

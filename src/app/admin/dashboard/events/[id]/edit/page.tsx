@@ -8,10 +8,13 @@ export const dynamic = "force-dynamic";
 
 export default async function EditEventPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ error?: string }>;
 }) {
   const { id } = await params;
+  const { error } = await searchParams;
 
   const [{ data: event }, { data: categories }] = await Promise.all([
     supabaseAdmin.from("events").select("*").eq("id", id).single<Event>(),
@@ -30,6 +33,7 @@ export default async function EditEventPage({
       </div>
 
       <div className="admin-card">
+        {error && <p className="error-message">{error}</p>}
         <form action={updateEvent}>
           <input type="hidden" name="id" value={event.id} />
 
@@ -86,8 +90,15 @@ export default async function EditEventPage({
           </div>
 
           <div className="form-field">
-            <label htmlFor="ev-image">URL de l&apos;image (optionnel)</label>
-            <input type="url" id="ev-image" name="image_url" defaultValue={event.image_url ?? ""} />
+            <label htmlFor="ev-image">Image (optionnel)</label>
+            {event.image_url && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={event.image_url} alt="" className="event-image" style={{ maxWidth: 200 }} />
+            )}
+            <input type="file" id="ev-image" name="image" accept="image/*" />
+            <span className="admin-list-item-meta">
+              Laisser vide pour conserver l&apos;image actuelle.
+            </span>
           </div>
 
           <button type="submit" className="btn btn-primary">
