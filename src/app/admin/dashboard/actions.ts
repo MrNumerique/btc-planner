@@ -21,6 +21,19 @@ export async function createCategory(formData: FormData) {
   refreshPublicPages();
 }
 
+export async function updateCategory(formData: FormData) {
+  const id = String(formData.get("id") ?? "");
+  const name = String(formData.get("name") ?? "").trim();
+  const color = String(formData.get("color") ?? "#3CAA3C");
+
+  if (!id || !name) return;
+
+  await supabaseAdmin.from("categories").update({ name, color }).eq("id", id);
+
+  refreshPublicPages();
+  redirect("/admin/dashboard");
+}
+
 export async function deleteCategory(formData: FormData) {
   const id = String(formData.get("id") ?? "");
   if (!id) return;

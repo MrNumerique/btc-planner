@@ -53,12 +53,15 @@ export default async function DashboardPage() {
                 <span className="admin-list-item-title">{category.name}</span>
                 <span className="admin-list-item-meta">{category.color}</span>
               </div>
-              <form action={deleteCategory}>
-                <input type="hidden" name="id" value={category.id} />
-                <button type="submit" className="btn btn-danger">
-                  Supprimer
-                </button>
-              </form>
+              <div className="admin-list-item-actions">
+                <EditLink href={`/admin/dashboard/categories/${category.id}/edit`} />
+                <form action={deleteCategory}>
+                  <input type="hidden" name="id" value={category.id} />
+                  <button type="submit" className="btn btn-danger">
+                    Supprimer
+                  </button>
+                </form>
+              </div>
             </div>
           ))}
         </div>
