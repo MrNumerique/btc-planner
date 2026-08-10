@@ -76,6 +76,7 @@ export default async function Home() {
           alt="Nos partenaires : Gouvernement, Itinéraire Emploi, Agglo du Saint-Quentinois, Communauté de Communes du Pays du Vermandois, Val d'Oise, P.L.I.E de l'Agglo du Saint-Quentinois, Plan Local pour l'Insertion et l'Emploi, Mission Locale du Saint-Quentinois, Union européenne"
           width={1235}
           height={103}
+          sizes="100vw"
           className="partners-strip"
         />
         <p>
