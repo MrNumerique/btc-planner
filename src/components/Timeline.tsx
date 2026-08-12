@@ -1,17 +1,20 @@
-import type { Category, Event } from "@/lib/types";
+import type { Category, Commune, Event } from "@/lib/types";
 import { EventCard } from "@/components/EventCard";
 
 type Props = {
   categories: Category[];
+  communes: Commune[];
   events: Event[];
 };
 
-export function Timeline({ categories, events }: Props) {
-  const lanes = categories
-    .map((category) => ({
-      category,
+export function Timeline({ categories, communes, events }: Props) {
+  const categoryById = new Map(categories.map((c) => [c.id, c]));
+
+  const lanes = communes
+    .map((commune) => ({
+      commune,
       events: events
-        .filter((event) => event.category_ids.includes(category.id))
+        .filter((event) => event.commune_id === commune.id)
         .sort((a, b) => a.start_date.localeCompare(b.start_date)),
     }))
     .filter((lane) => lane.events.length > 0);
@@ -22,20 +25,23 @@ export function Timeline({ categories, events }: Props) {
 
   return (
     <div className="timeline">
-      {lanes.map(({ category, events: categoryEvents }) => (
-        <section
-          key={category.id}
-          className="lane"
-          style={{ "--lane-color": category.color } as React.CSSProperties}
-        >
+      {lanes.map(({ commune, events: communeEvents }) => (
+        <section key={commune.id} className="lane">
           <div className="lane-header">
-            <span className="lane-title">{category.name}</span>
-            <span className="lane-count">{categoryEvents.length}</span>
+            <span className="lane-title">{commune.name}</span>
+            <span className="lane-count">{communeEvents.length}</span>
           </div>
 
           <div className="lane-track">
-            {categoryEvents.map((event) => (
-              <EventCard key={event.id} event={event} categoryName={category.name} color={category.color} />
+            {communeEvents.map((event) => (
+              <EventCard
+                key={event.id}
+                event={event}
+                categories={event.category_ids
+                  .map((id) => categoryById.get(id))
+                  .filter((c): c is Category => c !== undefined)}
+                communeName={commune.name}
+              />
             ))}
           </div>
         </section>

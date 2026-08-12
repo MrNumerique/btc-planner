@@ -1,24 +1,28 @@
 import Image from "next/image";
 import { supabase } from "@/lib/supabase";
 import { Timeline } from "@/components/Timeline";
-import type { Category, Event } from "@/lib/types";
+import type { Category, Commune, Event } from "@/lib/types";
 
 export const revalidate = 60;
 
-async function getData(): Promise<{ categories: Category[]; events: Event[] } | null> {
+async function getData(): Promise<
+  { categories: Category[]; communes: Commune[]; events: Event[] } | null
+> {
   try {
     const [
       { data: categories, error: catError },
+      { data: communes, error: comError },
       { data: events, error: evError },
       { data: eventCategories, error: ecError },
     ] = await Promise.all([
       supabase.from("categories").select("*").order("name"),
+      supabase.from("communes").select("*").order("name"),
       supabase.from("events").select("*").order("start_date"),
       supabase.from("event_categories").select("event_id, category_id"),
     ]);
 
-    if (catError || evError || ecError) {
-      console.error(catError ?? evError ?? ecError);
+    if (catError || comError || evError || ecError) {
+      console.error(catError ?? comError ?? evError ?? ecError);
       return null;
     }
 
@@ -34,7 +38,7 @@ async function getData(): Promise<{ categories: Category[]; events: Event[] } | 
       category_ids: categoryIdsByEvent.get(event.id) ?? [],
     }));
 
-    return { categories: categories ?? [], events: eventsWithCategories };
+    return { categories: categories ?? [], communes: communes ?? [], events: eventsWithCategories };
   } catch (err) {
     console.error(err);
     return null;
@@ -60,7 +64,7 @@ export default async function Home() {
         <h1>
           Le planning de <span>nos actions</span>
         </h1>
-        <p>Retrouvez ici toutes les actions du projet, classées par catégorie.</p>
+        <p>Retrouvez ici toutes les actions du projet, classées par commune.</p>
       </header>
 
       <svg
@@ -82,7 +86,7 @@ export default async function Home() {
             données.
           </p>
         ) : (
-          <Timeline categories={data.categories} events={data.events} />
+          <Timeline categories={data.categories} communes={data.communes} events={data.events} />
         )}
       </main>
 

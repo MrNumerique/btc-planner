@@ -4,17 +4,19 @@ import { logout } from "../actions";
 import { createCategory, deleteCategory, deleteEvent } from "./actions";
 import { AddEventForm } from "./AddEventForm";
 import { EditLink } from "@/components/EditLink";
-import type { Category, Event } from "@/lib/types";
+import type { Category, Commune, Event } from "@/lib/types";
 import { formatEventDate } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
-async function getData(): Promise<{ categories: Category[]; events: Event[] }> {
-  const [{ data: categories }, { data: events }, { data: eventCategories }] = await Promise.all([
-    supabaseAdmin.from("categories").select("*").order("name"),
-    supabaseAdmin.from("events").select("*").order("start_date"),
-    supabaseAdmin.from("event_categories").select("event_id, category_id"),
-  ]);
+async function getData(): Promise<{ categories: Category[]; communes: Commune[]; events: Event[] }> {
+  const [{ data: categories }, { data: communes }, { data: events }, { data: eventCategories }] =
+    await Promise.all([
+      supabaseAdmin.from("categories").select("*").order("name"),
+      supabaseAdmin.from("communes").select("*").order("name"),
+      supabaseAdmin.from("events").select("*").order("start_date"),
+      supabaseAdmin.from("event_categories").select("event_id, category_id"),
+    ]);
 
   const categoryIdsByEvent = new Map<string, string[]>();
   for (const row of eventCategories ?? []) {
@@ -28,12 +30,13 @@ async function getData(): Promise<{ categories: Category[]; events: Event[] }> {
     category_ids: categoryIdsByEvent.get(event.id) ?? [],
   }));
 
-  return { categories: categories ?? [], events: eventsWithCategories };
+  return { categories: categories ?? [], communes: communes ?? [], events: eventsWithCategories };
 }
 
 export default async function DashboardPage() {
-  const { categories, events } = await getData();
+  const { categories, communes, events } = await getData();
   const categoryById = new Map(categories.map((c) => [c.id, c]));
+  const communeById = new Map(communes.map((c) => [c.id, c]));
 
   return (
     <div className="admin-shell" style={{ maxWidth: 900 }}>
@@ -107,6 +110,7 @@ export default async function DashboardPage() {
               .map((id) => categoryById.get(id))
               .filter((c): c is Category => c !== undefined);
             const categoryNames = eventCategories.map((c) => c.name).join(", ") || "Sans catégorie";
+            const communeName = communeById.get(event.commune_id ?? "")?.name ?? "Sans commune";
             return (
               <div
                 key={event.id}
@@ -116,7 +120,7 @@ export default async function DashboardPage() {
                 <div className="admin-list-item-info">
                   <span className="admin-list-item-title">{event.title}</span>
                   <span className="admin-list-item-meta">
-                    {categoryNames} · {formatEventDate(event.start_date, event.end_date)}
+                    {communeName} · {categoryNames} · {formatEventDate(event.start_date, event.end_date)}
                   </span>
                 </div>
                 <div className="admin-list-item-actions">
@@ -134,7 +138,7 @@ export default async function DashboardPage() {
         </div>
 
         <h2>Ajouter un événement</h2>
-        <AddEventForm categories={categories} />
+        <AddEventForm categories={categories} communes={communes} />
       </div>
     </div>
   );

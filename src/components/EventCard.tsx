@@ -2,16 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import type { Event } from "@/lib/types";
+import type { Category, Event } from "@/lib/types";
 import { formatEventDate, formatEventTime } from "@/lib/format";
 
 type Props = {
   event: Event;
-  categoryName: string;
-  color: string;
+  categories: Category[];
+  communeName: string;
 };
 
-export function EventCard({ event, categoryName, color }: Props) {
+export function EventCard({ event, categories, communeName }: Props) {
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
@@ -44,7 +44,19 @@ export function EventCard({ event, categoryName, color }: Props) {
         <span className="event-date">{dateLabel}</span>
         <h3 className="event-title">{event.title}</h3>
         {event.description && <p className="event-desc">{event.description}</p>}
-        {event.location && <p className="event-meta">📍 {event.location}</p>}
+        {categories.length > 0 && (
+          <div className="category-badges">
+            {categories.map((category) => (
+              <span
+                key={category.id}
+                className="category-badge"
+                style={{ "--badge-color": category.color } as React.CSSProperties}
+              >
+                {category.name}
+              </span>
+            ))}
+          </div>
+        )}
       </button>
 
       {isOpen &&
@@ -52,7 +64,6 @@ export function EventCard({ event, categoryName, color }: Props) {
           <div className="event-modal-overlay" onClick={() => setIsOpen(false)}>
             <div
               className="event-modal"
-              style={{ "--modal-color": color } as React.CSSProperties}
               role="dialog"
               aria-modal="true"
               aria-labelledby={`event-modal-title-${event.id}`}
@@ -72,11 +83,23 @@ export function EventCard({ event, categoryName, color }: Props) {
                 <img src={event.image_url} alt="" className="event-modal-image" />
               )}
 
-              <span className="event-modal-category">{categoryName}</span>
+              <p className="event-modal-meta">📍 {communeName}</p>
               <h2 id={`event-modal-title-${event.id}`}>{event.title}</h2>
               <p className="event-modal-date">{dateLabel}</p>
               {event.description && <p className="event-modal-desc">{event.description}</p>}
-              {event.location && <p className="event-modal-meta">📍 {event.location}</p>}
+              {categories.length > 0 && (
+                <div className="category-badges">
+                  {categories.map((category) => (
+                    <span
+                      key={category.id}
+                      className="category-badge"
+                      style={{ "--badge-color": category.color } as React.CSSProperties}
+                    >
+                      {category.name}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
           </div>,
           document.body,

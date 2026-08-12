@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { updateEvent } from "../../../actions";
-import type { Category, Event } from "@/lib/types";
+import type { Category, Commune, Event } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -16,11 +16,17 @@ export default async function EditEventPage({
   const { id } = await params;
   const { error } = await searchParams;
 
-  const [{ data: eventRow }, { data: categories }, { data: eventCategories }] = await Promise.all([
-    supabaseAdmin.from("events").select("*").eq("id", id).single<Omit<Event, "category_ids">>(),
-    supabaseAdmin.from("categories").select("*").order("name").returns<Category[]>(),
-    supabaseAdmin.from("event_categories").select("category_id").eq("event_id", id).returns<{ category_id: string }[]>(),
-  ]);
+  const [{ data: eventRow }, { data: categories }, { data: communes }, { data: eventCategories }] =
+    await Promise.all([
+      supabaseAdmin.from("events").select("*").eq("id", id).single<Omit<Event, "category_ids">>(),
+      supabaseAdmin.from("categories").select("*").order("name").returns<Category[]>(),
+      supabaseAdmin.from("communes").select("*").order("name").returns<Commune[]>(),
+      supabaseAdmin
+        .from("event_categories")
+        .select("category_id")
+        .eq("event_id", id)
+        .returns<{ category_id: string }[]>(),
+    ]);
 
   if (!eventRow) {
     notFound();
@@ -101,8 +107,17 @@ export default async function EditEventPage({
           </div>
 
           <div className="form-field">
-            <label htmlFor="ev-location">Lieu</label>
-            <input type="text" id="ev-location" name="location" defaultValue={event.location ?? ""} />
+            <label htmlFor="ev-commune">Commune</label>
+            <select id="ev-commune" name="commune_id" required defaultValue={event.commune_id ?? ""}>
+              <option value="" disabled>
+                Sélectionner une commune
+              </option>
+              {(communes ?? []).map((commune) => (
+                <option key={commune.id} value={commune.id}>
+                  {commune.name}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="form-field">

@@ -48,9 +48,10 @@ export async function createEvent(
 ): Promise<FormState> {
   const title = String(formData.get("title") ?? "").trim();
   const categoryIds = formData.getAll("category_ids").map(String).filter(Boolean);
+  const communeId = String(formData.get("commune_id") ?? "").trim() || null;
   const startDate = String(formData.get("start_date") ?? "");
 
-  if (!title || !startDate) {
+  if (!title || !startDate || !communeId) {
     return { status: "error", message: "Merci de remplir les champs obligatoires." };
   }
 
@@ -59,7 +60,6 @@ export async function createEvent(
   }
 
   const description = String(formData.get("description") ?? "").trim() || null;
-  const location = String(formData.get("location") ?? "").trim() || null;
   const endDate = String(formData.get("end_date") ?? "").trim() || null;
   const startTime = String(formData.get("start_time") ?? "").trim() || null;
   const endTime = String(formData.get("end_time") ?? "").trim() || null;
@@ -83,7 +83,7 @@ export async function createEvent(
       start_time: startTime,
       end_time: endTime,
       description,
-      location,
+      commune_id: communeId,
       image_url: imageUrl,
     })
     .select("id")
@@ -109,12 +109,12 @@ export async function updateEvent(formData: FormData) {
   const id = String(formData.get("id") ?? "");
   const title = String(formData.get("title") ?? "").trim();
   const categoryIds = formData.getAll("category_ids").map(String).filter(Boolean);
+  const communeId = String(formData.get("commune_id") ?? "").trim() || null;
   const startDate = String(formData.get("start_date") ?? "");
 
-  if (!id || !title || categoryIds.length === 0 || !startDate) return;
+  if (!id || !title || categoryIds.length === 0 || !communeId || !startDate) return;
 
   const description = String(formData.get("description") ?? "").trim() || null;
-  const location = String(formData.get("location") ?? "").trim() || null;
   const endDate = String(formData.get("end_date") ?? "").trim() || null;
   const startTime = String(formData.get("start_time") ?? "").trim() || null;
   const endTime = String(formData.get("end_time") ?? "").trim() || null;
@@ -126,7 +126,7 @@ export async function updateEvent(formData: FormData) {
     start_time: startTime,
     end_time: endTime,
     description,
-    location,
+    commune_id: communeId,
   };
 
   const imageFile = formData.get("image");
