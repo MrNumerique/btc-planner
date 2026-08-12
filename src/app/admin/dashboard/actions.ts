@@ -58,6 +58,7 @@ export async function createEvent(
   const location = String(formData.get("location") ?? "").trim() || null;
   const endDate = String(formData.get("end_date") ?? "").trim() || null;
   const startTime = String(formData.get("start_time") ?? "").trim() || null;
+  const endTime = String(formData.get("end_time") ?? "").trim() || null;
 
   let imageUrl: string | null = null;
   const imageFile = formData.get("image");
@@ -75,6 +76,7 @@ export async function createEvent(
     start_date: startDate,
     end_date: endDate,
     start_time: startTime,
+    end_time: endTime,
     description,
     location,
     image_url: imageUrl,
@@ -100,6 +102,7 @@ export async function updateEvent(formData: FormData) {
   const location = String(formData.get("location") ?? "").trim() || null;
   const endDate = String(formData.get("end_date") ?? "").trim() || null;
   const startTime = String(formData.get("start_time") ?? "").trim() || null;
+  const endTime = String(formData.get("end_time") ?? "").trim() || null;
 
   const update: Record<string, unknown> = {
     title,
@@ -107,6 +110,7 @@ export async function updateEvent(formData: FormData) {
     start_date: startDate,
     end_date: endDate,
     start_time: startTime,
+    end_time: endTime,
     description,
     location,
   };

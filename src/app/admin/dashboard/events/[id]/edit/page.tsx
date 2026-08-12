@@ -69,12 +69,21 @@ export default async function EditEventPage({
               <input type="date" id="ev-end" name="end_date" defaultValue={event.end_date ?? ""} />
             </div>
             <div className="form-field">
-              <label htmlFor="ev-time">Heure (optionnel)</label>
+              <label htmlFor="ev-time">Heure de début (optionnel)</label>
               <input
                 type="time"
                 id="ev-time"
                 name="start_time"
                 defaultValue={event.start_time?.slice(0, 5) ?? ""}
+              />
+            </div>
+            <div className="form-field">
+              <label htmlFor="ev-end-time">Heure de fin (optionnel)</label>
+              <input
+                type="time"
+                id="ev-end-time"
+                name="end_time"
+                defaultValue={event.end_time?.slice(0, 5) ?? ""}
               />
             </div>
           </div>

@@ -10,3 +10,12 @@ export function formatEventDate(startDate: string, endDate: string | null): stri
   const endLabel = end.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
   return `${startLabel} → ${endLabel}`;
 }
+
+export function formatEventTime(startTime: string | null, endTime: string | null): string {
+  if (!startTime) return "";
+
+  const startLabel = startTime.slice(0, 5);
+  if (!endTime) return startLabel;
+
+  return `${startLabel} → ${endTime.slice(0, 5)}`;
+}

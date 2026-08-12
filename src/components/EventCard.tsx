@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import type { Event } from "@/lib/types";
-import { formatEventDate } from "@/lib/format";
+import { formatEventDate, formatEventTime } from "@/lib/format";
 
 type Props = {
   event: Event;
@@ -29,8 +29,9 @@ export function EventCard({ event, categoryName, color }: Props) {
     };
   }, [isOpen]);
 
+  const timeLabel = formatEventTime(event.start_time, event.end_time);
   const dateLabel = `${formatEventDate(event.start_date, event.end_date)}${
-    event.start_time ? ` · ${event.start_time.slice(0, 5)}` : ""
+    timeLabel ? ` · ${timeLabel}` : ""
   }`;
 
   return (

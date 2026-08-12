@@ -18,6 +18,7 @@ create table if not exists events (
   start_date date not null,
   end_date date,
   start_time time,
+  end_time time,
   category_id uuid not null references categories(id) on delete cascade,
   created_at timestamptz not null default now()
 );
