@@ -10,12 +10,25 @@ import { formatEventDate } from "@/lib/format";
 export const dynamic = "force-dynamic";
 
 async function getData(): Promise<{ categories: Category[]; events: Event[] }> {
-  const [{ data: categories }, { data: events }] = await Promise.all([
+  const [{ data: categories }, { data: events }, { data: eventCategories }] = await Promise.all([
     supabaseAdmin.from("categories").select("*").order("name"),
     supabaseAdmin.from("events").select("*").order("start_date"),
+    supabaseAdmin.from("event_categories").select("event_id, category_id"),
   ]);
 
-  return { categories: categories ?? [], events: events ?? [] };
+  const categoryIdsByEvent = new Map<string, string[]>();
+  for (const row of eventCategories ?? []) {
+    const list = categoryIdsByEvent.get(row.event_id) ?? [];
+    list.push(row.category_id);
+    categoryIdsByEvent.set(row.event_id, list);
+  }
+
+  const eventsWithCategories = (events ?? []).map((event) => ({
+    ...event,
+    category_ids: categoryIdsByEvent.get(event.id) ?? [],
+  }));
+
+  return { categories: categories ?? [], events: eventsWithCategories };
 }
 
 export default async function DashboardPage() {
@@ -90,18 +103,20 @@ export default async function DashboardPage() {
         <div className="admin-list">
           {events.length === 0 && <p className="lane-empty">Aucun événement.</p>}
           {events.map((event) => {
-            const category = categoryById.get(event.category_id);
+            const eventCategories = event.category_ids
+              .map((id) => categoryById.get(id))
+              .filter((c): c is Category => c !== undefined);
+            const categoryNames = eventCategories.map((c) => c.name).join(", ") || "Sans catégorie";
             return (
               <div
                 key={event.id}
                 className="admin-list-item"
-                style={{ "--item-color": category?.color ?? "#3CAA3C" } as React.CSSProperties}
+                style={{ "--item-color": eventCategories[0]?.color ?? "#3CAA3C" } as React.CSSProperties}
               >
                 <div className="admin-list-item-info">
                   <span className="admin-list-item-title">{event.title}</span>
                   <span className="admin-list-item-meta">
-                    {category?.name ?? "Sans catégorie"} ·{" "}
-                    {formatEventDate(event.start_date, event.end_date)}
+                    {categoryNames} · {formatEventDate(event.start_date, event.end_date)}
                   </span>
                 </div>
                 <div className="admin-list-item-actions">

@@ -7,18 +7,34 @@ export const revalidate = 60;
 
 async function getData(): Promise<{ categories: Category[]; events: Event[] } | null> {
   try {
-    const [{ data: categories, error: catError }, { data: events, error: evError }] =
-      await Promise.all([
-        supabase.from("categories").select("*").order("name"),
-        supabase.from("events").select("*").order("start_date"),
-      ]);
+    const [
+      { data: categories, error: catError },
+      { data: events, error: evError },
+      { data: eventCategories, error: ecError },
+    ] = await Promise.all([
+      supabase.from("categories").select("*").order("name"),
+      supabase.from("events").select("*").order("start_date"),
+      supabase.from("event_categories").select("event_id, category_id"),
+    ]);
 
-    if (catError || evError) {
-      console.error(catError ?? evError);
+    if (catError || evError || ecError) {
+      console.error(catError ?? evError ?? ecError);
       return null;
     }
 
-    return { categories: categories ?? [], events: events ?? [] };
+    const categoryIdsByEvent = new Map<string, string[]>();
+    for (const row of eventCategories ?? []) {
+      const list = categoryIdsByEvent.get(row.event_id) ?? [];
+      list.push(row.category_id);
+      categoryIdsByEvent.set(row.event_id, list);
+    }
+
+    const eventsWithCategories = (events ?? []).map((event) => ({
+      ...event,
+      category_ids: categoryIdsByEvent.get(event.id) ?? [],
+    }));
+
+    return { categories: categories ?? [], events: eventsWithCategories };
   } catch (err) {
     console.error(err);
     return null;

@@ -11,7 +11,7 @@ export function Timeline({ categories, events }: Props) {
     .map((category) => ({
       category,
       events: events
-        .filter((event) => event.category_id === category.id)
+        .filter((event) => event.category_ids.includes(category.id))
         .sort((a, b) => a.start_date.localeCompare(b.start_date)),
     }))
     .filter((lane) => lane.events.length > 0);

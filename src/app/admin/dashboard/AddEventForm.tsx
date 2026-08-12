@@ -27,14 +27,15 @@ export function AddEventForm({ categories }: { categories: Category[] }) {
         </div>
 
         <div className="form-field">
-          <label htmlFor="ev-category">Catégorie</label>
-          <select id="ev-category" name="category_id" required>
+          <label>Catégories</label>
+          <div className="checkbox-group">
             {categories.map((category) => (
-              <option key={category.id} value={category.id}>
+              <label key={category.id} className="checkbox-option">
+                <input type="checkbox" name="category_ids" value={category.id} />
                 {category.name}
-              </option>
+              </label>
             ))}
-          </select>
+          </div>
         </div>
 
         <div className="form-row">

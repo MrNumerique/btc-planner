@@ -47,11 +47,15 @@ export async function createEvent(
   formData: FormData,
 ): Promise<FormState> {
   const title = String(formData.get("title") ?? "").trim();
-  const categoryId = String(formData.get("category_id") ?? "");
+  const categoryIds = formData.getAll("category_ids").map(String).filter(Boolean);
   const startDate = String(formData.get("start_date") ?? "");
 
-  if (!title || !categoryId || !startDate) {
+  if (!title || !startDate) {
     return { status: "error", message: "Merci de remplir les champs obligatoires." };
+  }
+
+  if (categoryIds.length === 0) {
+    return { status: "error", message: "Merci de sélectionner au moins une catégorie." };
   }
 
   const description = String(formData.get("description") ?? "").trim() || null;
@@ -70,19 +74,30 @@ export async function createEvent(
     }
   }
 
-  const { error } = await supabaseAdmin.from("events").insert({
-    title,
-    category_id: categoryId,
-    start_date: startDate,
-    end_date: endDate,
-    start_time: startTime,
-    end_time: endTime,
-    description,
-    location,
-    image_url: imageUrl,
-  });
+  const { data: inserted, error } = await supabaseAdmin
+    .from("events")
+    .insert({
+      title,
+      start_date: startDate,
+      end_date: endDate,
+      start_time: startTime,
+      end_time: endTime,
+      description,
+      location,
+      image_url: imageUrl,
+    })
+    .select("id")
+    .single();
 
-  if (error) {
+  if (error || !inserted) {
+    return { status: "error", message: "Erreur lors de l'ajout de l'événement." };
+  }
+
+  const { error: linkError } = await supabaseAdmin
+    .from("event_categories")
+    .insert(categoryIds.map((categoryId) => ({ event_id: inserted.id, category_id: categoryId })));
+
+  if (linkError) {
     return { status: "error", message: "Erreur lors de l'ajout de l'événement." };
   }
 
@@ -93,10 +108,10 @@ export async function createEvent(
 export async function updateEvent(formData: FormData) {
   const id = String(formData.get("id") ?? "");
   const title = String(formData.get("title") ?? "").trim();
-  const categoryId = String(formData.get("category_id") ?? "");
+  const categoryIds = formData.getAll("category_ids").map(String).filter(Boolean);
   const startDate = String(formData.get("start_date") ?? "");
 
-  if (!id || !title || !categoryId || !startDate) return;
+  if (!id || !title || categoryIds.length === 0 || !startDate) return;
 
   const description = String(formData.get("description") ?? "").trim() || null;
   const location = String(formData.get("location") ?? "").trim() || null;
@@ -106,7 +121,6 @@ export async function updateEvent(formData: FormData) {
 
   const update: Record<string, unknown> = {
     title,
-    category_id: categoryId,
     start_date: startDate,
     end_date: endDate,
     start_time: startTime,
@@ -125,6 +139,11 @@ export async function updateEvent(formData: FormData) {
   }
 
   await supabaseAdmin.from("events").update(update).eq("id", id);
+
+  await supabaseAdmin.from("event_categories").delete().eq("event_id", id);
+  await supabaseAdmin
+    .from("event_categories")
+    .insert(categoryIds.map((categoryId) => ({ event_id: id, category_id: categoryId })));
 
   refreshPublicPages();
   redirect("/admin/dashboard");

@@ -15,7 +15,7 @@ export type Event = {
   end_date: string | null;
   start_time: string | null;
   end_time: string | null;
-  category_id: string;
+  category_ids: string[];
   created_at: string;
 };
 
