@@ -3,6 +3,7 @@ import Link from "next/link";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { updateEvent } from "../../../actions";
 import type { Category, Commune, Event } from "@/lib/types";
+import { CommuneSelect } from "@/components/CommuneSelect";
 
 export const dynamic = "force-dynamic";
 
@@ -108,16 +109,7 @@ export default async function EditEventPage({
 
           <div className="form-field">
             <label htmlFor="ev-commune">Commune</label>
-            <select id="ev-commune" name="commune_id" required defaultValue={event.commune_id ?? ""}>
-              <option value="" disabled>
-                Sélectionner une commune
-              </option>
-              {(communes ?? []).map((commune) => (
-                <option key={commune.id} value={commune.id}>
-                  {commune.name}
-                </option>
-              ))}
-            </select>
+            <CommuneSelect communes={communes ?? []} defaultCommuneId={event.commune_id} />
           </div>
 
           <div className="form-field">

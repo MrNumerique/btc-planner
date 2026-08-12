@@ -1,11 +1,12 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createEvent } from "./actions";
 import { initialFormState } from "@/lib/types";
 import type { Category, Commune } from "@/lib/types";
 import { AutoToast } from "@/components/Toast";
+import { CommuneSelect } from "@/components/CommuneSelect";
 
 export function AddEventForm({
   categories,
@@ -17,10 +18,12 @@ export function AddEventForm({
   const [state, formAction, isPending] = useActionState(createEvent, initialFormState);
   const formRef = useRef<HTMLFormElement>(null);
   const router = useRouter();
+  const [resetKey, setResetKey] = useState(0);
 
   useEffect(() => {
     if (state.status !== "success") return;
     formRef.current?.reset();
+    setResetKey((key) => key + 1);
     router.refresh();
   }, [state, router]);
 
@@ -65,16 +68,7 @@ export function AddEventForm({
 
         <div className="form-field">
           <label htmlFor="ev-commune">Commune</label>
-          <select id="ev-commune" name="commune_id" required defaultValue="">
-            <option value="" disabled>
-              Sélectionner une commune
-            </option>
-            {communes.map((commune) => (
-              <option key={commune.id} value={commune.id}>
-                {commune.name}
-              </option>
-            ))}
-          </select>
+          <CommuneSelect key={resetKey} communes={communes} />
         </div>
 
         <div className="form-field">
