@@ -38,6 +38,22 @@ export async function deleteCategory(formData: FormData) {
   const id = String(formData.get("id") ?? "");
   if (!id) return;
 
+  const { data: links } = await supabaseAdmin
+    .from("event_categories")
+    .select("event_id, category_id");
+
+  const eventIdsWithThisCategory = new Set(
+    (links ?? []).filter((link) => link.category_id === id).map((link) => link.event_id),
+  );
+  const eventIdsWithAnotherCategory = new Set(
+    (links ?? []).filter((link) => link.category_id !== id).map((link) => link.event_id),
+  );
+  const wouldOrphanAnEvent = [...eventIdsWithThisCategory].some(
+    (eventId) => !eventIdsWithAnotherCategory.has(eventId),
+  );
+
+  if (wouldOrphanAnEvent) return;
+
   await supabaseAdmin.from("categories").delete().eq("id", id);
   refreshPublicPages();
 }
@@ -98,6 +114,7 @@ export async function createEvent(
     .insert(categoryIds.map((categoryId) => ({ event_id: inserted.id, category_id: categoryId })));
 
   if (linkError) {
+    await supabaseAdmin.from("events").delete().eq("id", inserted.id);
     return { status: "error", message: "Erreur lors de l'ajout de l'événement." };
   }
 
@@ -112,7 +129,15 @@ export async function updateEvent(formData: FormData) {
   const communeId = String(formData.get("commune_id") ?? "").trim() || null;
   const startDate = String(formData.get("start_date") ?? "");
 
-  if (!id || !title || categoryIds.length === 0 || !communeId || !startDate) return;
+  if (!id) return;
+
+  if (!title || categoryIds.length === 0 || !communeId || !startDate) {
+    redirect(
+      `/admin/dashboard/events/${id}/edit?error=${encodeURIComponent(
+        "Merci de remplir les champs obligatoires (dont la commune et au moins une catégorie).",
+      )}`,
+    );
+  }
 
   const description = String(formData.get("description") ?? "").trim() || null;
   const endDate = String(formData.get("end_date") ?? "").trim() || null;
@@ -138,12 +163,26 @@ export async function updateEvent(formData: FormData) {
     }
   }
 
-  await supabaseAdmin.from("events").update(update).eq("id", id);
+  const genericErrorRedirect = () =>
+    redirect(
+      `/admin/dashboard/events/${id}/edit?error=${encodeURIComponent(
+        "Erreur lors de la mise à jour de l'événement.",
+      )}`,
+    );
 
-  await supabaseAdmin.from("event_categories").delete().eq("event_id", id);
-  await supabaseAdmin
+  const { error: updateError } = await supabaseAdmin.from("events").update(update).eq("id", id);
+  if (updateError) genericErrorRedirect();
+
+  const { error: deleteError } = await supabaseAdmin
+    .from("event_categories")
+    .delete()
+    .eq("event_id", id);
+  if (deleteError) genericErrorRedirect();
+
+  const { error: insertError } = await supabaseAdmin
     .from("event_categories")
     .insert(categoryIds.map((categoryId) => ({ event_id: id, category_id: categoryId })));
+  if (insertError) genericErrorRedirect();
 
   refreshPublicPages();
   redirect("/admin/dashboard");

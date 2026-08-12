@@ -2,6 +2,7 @@ import Image from "next/image";
 import { supabase } from "@/lib/supabase";
 import { Timeline } from "@/components/Timeline";
 import type { Category, Commune, Event } from "@/lib/types";
+import { groupCategoryIdsByEvent } from "@/lib/events";
 
 export const revalidate = 60;
 
@@ -26,12 +27,7 @@ async function getData(): Promise<
       return null;
     }
 
-    const categoryIdsByEvent = new Map<string, string[]>();
-    for (const row of eventCategories ?? []) {
-      const list = categoryIdsByEvent.get(row.event_id) ?? [];
-      list.push(row.category_id);
-      categoryIdsByEvent.set(row.event_id, list);
-    }
+    const categoryIdsByEvent = groupCategoryIdsByEvent(eventCategories ?? []);
 
     const eventsWithCategories = (events ?? []).map((event) => ({
       ...event,

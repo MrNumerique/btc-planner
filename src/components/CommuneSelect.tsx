@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { Commune } from "@/lib/types";
 
 type Props = {
@@ -14,19 +14,26 @@ export function CommuneSelect({ communes, defaultCommuneId }: Props) {
   const defaultCommune = defaultCommuneId ? byId.get(defaultCommuneId) : undefined;
 
   const [text, setText] = useState(defaultCommune?.name ?? "");
-  const [communeId, setCommuneId] = useState(defaultCommune?.id ?? "");
+  const inputRef = useRef<HTMLInputElement>(null);
+  const communeId = byName.get(text.trim().toLowerCase())?.id ?? "";
 
   return (
     <>
       <input
+        ref={inputRef}
         type="text"
         id="ev-commune"
         list="commune-options"
         value={text}
         onChange={(e) => {
-          const value = e.target.value;
-          setText(value);
-          setCommuneId(byName.get(value.trim().toLowerCase())?.id ?? "");
+          setText(e.target.value);
+          e.target.setCustomValidity("");
+        }}
+        onBlur={(e) => {
+          const match = byName.get(e.target.value.trim().toLowerCase());
+          e.target.setCustomValidity(
+            e.target.value && !match ? "Sélectionnez une commune dans la liste." : "",
+          );
         }}
         autoComplete="off"
         placeholder="Rechercher une commune…"

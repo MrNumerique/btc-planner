@@ -6,6 +6,7 @@ import { AddEventForm } from "./AddEventForm";
 import { EditLink } from "@/components/EditLink";
 import type { Category, Commune, Event } from "@/lib/types";
 import { formatEventDate } from "@/lib/format";
+import { groupCategoryIdsByEvent, resolveCategories } from "@/lib/events";
 
 export const dynamic = "force-dynamic";
 
@@ -18,12 +19,7 @@ async function getData(): Promise<{ categories: Category[]; communes: Commune[];
       supabaseAdmin.from("event_categories").select("event_id, category_id"),
     ]);
 
-  const categoryIdsByEvent = new Map<string, string[]>();
-  for (const row of eventCategories ?? []) {
-    const list = categoryIdsByEvent.get(row.event_id) ?? [];
-    list.push(row.category_id);
-    categoryIdsByEvent.set(row.event_id, list);
-  }
+  const categoryIdsByEvent = groupCategoryIdsByEvent(eventCategories ?? []);
 
   const eventsWithCategories = (events ?? []).map((event) => ({
     ...event,
@@ -106,9 +102,7 @@ export default async function DashboardPage() {
         <div className="admin-list">
           {events.length === 0 && <p className="lane-empty">Aucun événement.</p>}
           {events.map((event) => {
-            const eventCategories = event.category_ids
-              .map((id) => categoryById.get(id))
-              .filter((c): c is Category => c !== undefined);
+            const eventCategories = resolveCategories(event.category_ids, categoryById);
             const categoryNames = eventCategories.map((c) => c.name).join(", ") || "Sans catégorie";
             const communeName = communeById.get(event.commune_id ?? "")?.name ?? "Sans commune";
             return (
