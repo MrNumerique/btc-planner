@@ -120,8 +120,14 @@ export default async function EditEventPage({
           <div className="form-field">
             <label htmlFor="ev-image">Image (optionnel)</label>
             {event.image_url && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={event.image_url} alt="" className="event-image" style={{ maxWidth: 200 }} />
+              <>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={event.image_url} alt="" className="event-image" style={{ maxWidth: 200 }} />
+                <label className="checkbox-option">
+                  <input type="checkbox" name="remove_image" value="1" />
+                  Supprimer l&apos;image actuelle
+                </label>
+              </>
             )}
             <input type="file" id="ev-image" name="image" accept="image/*" />
             <span className="admin-list-item-meta">

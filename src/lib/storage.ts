@@ -26,3 +26,12 @@ export async function uploadEventImage(file: File): Promise<string> {
 
   return supabaseAdmin.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
 }
+
+export async function deleteEventImage(url: string): Promise<void> {
+  const marker = `/${BUCKET}/`;
+  const index = url.indexOf(marker);
+  if (index === -1) return;
+
+  const path = url.slice(index + marker.length);
+  await supabaseAdmin.storage.from(BUCKET).remove([path]);
+}

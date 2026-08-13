@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { supabaseAdmin } from "@/lib/supabase-admin";
-import { uploadEventImage } from "@/lib/storage";
+import { deleteEventImage, uploadEventImage } from "@/lib/storage";
 import type { FormState } from "@/lib/types";
 
 function refreshPublicPages() {
@@ -155,11 +155,26 @@ export async function updateEvent(formData: FormData) {
   };
 
   const imageFile = formData.get("image");
+  const removeImage = formData.get("remove_image") === "1";
+
   if (imageFile instanceof File && imageFile.size > 0) {
     try {
       update.image_url = await uploadEventImage(imageFile);
     } catch (err) {
       redirect(`/admin/dashboard/events/${id}/edit?error=${encodeURIComponent((err as Error).message)}`);
+    }
+  } else if (removeImage) {
+    update.image_url = null;
+  }
+
+  if ((imageFile instanceof File && imageFile.size > 0) || removeImage) {
+    const { data: current } = await supabaseAdmin
+      .from("events")
+      .select("image_url")
+      .eq("id", id)
+      .single();
+    if (current?.image_url) {
+      await deleteEventImage(current.image_url);
     }
   }
 
