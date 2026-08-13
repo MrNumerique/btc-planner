@@ -731,6 +731,33 @@ footer.site-footer strong {
   margin-bottom: 8px;
 }
 
+.geocache-locate-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 1000;
+  font-family: var(--font-nunito), "Nunito", sans-serif;
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 8px 16px;
+  border-radius: 50px;
+  border: none;
+  background: var(--white);
+  color: var(--blue-dark);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.geocache-locate-btn:hover {
+  transform: translateY(-1px);
+}
+
+.geocache-locate-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
 .geocache-popup-difficulty {
   display: inline-block;
   font-size: 0.75rem;
