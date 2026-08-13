@@ -123,6 +123,31 @@ main {
   padding: 40px 20px 60px;
 }
 
+/* COMMUNE PICKER */
+.commune-picker {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 420px;
+  margin: 0 auto 32px;
+}
+
+.commune-picker input {
+  flex: 1;
+  font-family: var(--font-nunito), "Nunito", sans-serif;
+  font-size: 0.95rem;
+  padding: 10px 12px;
+  border: 1.5px solid var(--blue-light);
+  border-radius: 10px;
+  color: var(--text);
+  background: var(--bg);
+}
+
+.commune-picker input:focus {
+  outline: none;
+  border-color: var(--blue);
+}
+
 /* TIMELINE */
 .timeline {
   display: flex;
@@ -137,6 +162,11 @@ main {
   border-left: 6px solid var(--green);
   padding: 20px 20px 24px;
   animation: fadeUp 0.5s ease both;
+}
+
+.lane-selected {
+  border-left-color: var(--blue);
+  box-shadow: 0 4px 16px rgba(58, 126, 198, 0.18);
 }
 
 .lane-header {

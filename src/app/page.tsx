@@ -6,24 +6,31 @@ import { groupCategoryIdsByEvent } from "@/lib/events";
 
 export const revalidate = 60;
 
-async function getData(): Promise<
-  { categories: Category[]; communes: Commune[]; events: Event[] } | null
-> {
+type PageData = {
+  categories: Category[];
+  communes: Commune[];
+  events: Event[];
+  neighborPairs: { commune_id: string; neighbor_id: string }[];
+};
+
+async function getData(): Promise<PageData | null> {
   try {
     const [
       { data: categories, error: catError },
       { data: communes, error: comError },
       { data: events, error: evError },
       { data: eventCategories, error: ecError },
+      { data: neighborPairs, error: neError },
     ] = await Promise.all([
       supabase.from("categories").select("*").order("name"),
       supabase.from("communes").select("*").order("name"),
       supabase.from("events").select("*").order("start_date"),
       supabase.from("event_categories").select("event_id, category_id"),
+      supabase.from("commune_neighbors").select("commune_id, neighbor_id"),
     ]);
 
-    if (catError || comError || evError || ecError) {
-      console.error(catError ?? comError ?? evError ?? ecError);
+    if (catError || comError || evError || ecError || neError) {
+      console.error(catError ?? comError ?? evError ?? ecError ?? neError);
       return null;
     }
 
@@ -34,7 +41,12 @@ async function getData(): Promise<
       category_ids: categoryIdsByEvent.get(event.id) ?? [],
     }));
 
-    return { categories: categories ?? [], communes: communes ?? [], events: eventsWithCategories };
+    return {
+      categories: categories ?? [],
+      communes: communes ?? [],
+      events: eventsWithCategories,
+      neighborPairs: neighborPairs ?? [],
+    };
   } catch (err) {
     console.error(err);
     return null;
@@ -82,7 +94,12 @@ export default async function Home() {
             données.
           </p>
         ) : (
-          <Timeline categories={data.categories} communes={data.communes} events={data.events} />
+          <Timeline
+            categories={data.categories}
+            communes={data.communes}
+            events={data.events}
+            neighborPairs={data.neighborPairs}
+          />
         )}
       </main>
 
