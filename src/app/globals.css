@@ -718,6 +718,34 @@ footer.site-footer strong {
   border-left-color: var(--red-brick);
 }
 
+/* GEOCACHING */
+.geocache-map {
+  width: 100%;
+  height: 480px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.geocache-map-picker {
+  height: 320px;
+  margin-bottom: 8px;
+}
+
+.geocache-popup-image {
+  width: 100%;
+  max-width: 200px;
+  height: auto;
+  border-radius: 8px;
+  margin-bottom: 6px;
+}
+
+.geocache-popup-difficulty {
+  font-size: 0.8rem;
+  color: var(--text-light);
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
 @keyframes toastIn {
   from {
     opacity: 0;

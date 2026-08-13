@@ -25,6 +25,19 @@ export type Event = {
   created_at: string;
 };
 
+export type Difficulty = "easy" | "medium" | "hard";
+
+export type Geocache = {
+  id: string;
+  name: string;
+  description: string | null;
+  image_url: string | null;
+  difficulty: Difficulty;
+  latitude: number;
+  longitude: number;
+  created_at: string;
+};
+
 export type FormState = {
   status: "idle" | "success" | "error";
   message: string;

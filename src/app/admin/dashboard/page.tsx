@@ -42,6 +42,7 @@ export default async function DashboardPage() {
           <Link href="/" target="_blank">
             Voir le planning public →
           </Link>
+          <Link href="/admin/dashboard/geocaching">Chasse aux trésors →</Link>
           <form action={logout}>
             <button type="submit" className="btn btn-ghost">
               Déconnexion

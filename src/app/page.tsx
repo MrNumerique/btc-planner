@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { Timeline } from "@/components/Timeline";
 import type { Category, Commune, Event } from "@/lib/types";
@@ -73,6 +74,11 @@ export default async function Home() {
           Le planning de <span>nos actions</span>
         </h1>
         <p>Retrouvez ici toutes les actions du projet, classées par commune.</p>
+        <p style={{ marginTop: 12 }}>
+          <Link href="/geocaching" className="btn btn-primary">
+            🧭 Chasse aux trésors
+          </Link>
+        </p>
       </header>
 
       <svg

@@ -41,6 +41,17 @@ create table if not exists commune_neighbors (
   check (commune_id <> neighbor_id)
 );
 
+create table if not exists geocaches (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  description text,
+  image_url text,
+  difficulty text not null default 'medium' check (difficulty in ('easy', 'medium', 'hard')),
+  latitude double precision not null,
+  longitude double precision not null,
+  created_at timestamptz not null default now()
+);
+
 create index if not exists events_start_date_idx on events(start_date);
 create index if not exists events_commune_id_idx on events(commune_id);
 create index if not exists event_categories_category_id_idx on event_categories(category_id);
@@ -51,6 +62,7 @@ alter table communes enable row level security;
 alter table events enable row level security;
 alter table event_categories enable row level security;
 alter table commune_neighbors enable row level security;
+alter table geocaches enable row level security;
 
 -- Lecture publique (page d'affichage), aucune écriture publique autorisée.
 -- Les écritures passent uniquement par le back office, via la clé service_role
@@ -68,6 +80,9 @@ create policy "Public read event_categories" on event_categories
   for select using (true);
 
 create policy "Public read commune_neighbors" on commune_neighbors
+  for select using (true);
+
+create policy "Public read geocaches" on geocaches
   for select using (true);
 
 -- Quelques catégories de départ (facultatif, modifiable depuis le back office)
