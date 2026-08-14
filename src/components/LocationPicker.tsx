@@ -2,7 +2,8 @@
 
 import "leaflet/dist/leaflet.css";
 import "@/components/leaflet-icons";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import type { Map as LeafletMap } from "leaflet";
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 
 const DEFAULT_CENTER: [number, number] = [49.849, 3.287];
@@ -25,10 +26,36 @@ export default function LocationPicker({ defaultLatitude, defaultLongitude }: Pr
   const [position, setPosition] = useState<[number, number] | null>(
     defaultLatitude != null && defaultLongitude != null ? [defaultLatitude, defaultLongitude] : null,
   );
+  const [locating, setLocating] = useState(false);
+  const mapRef = useRef<LeafletMap | null>(null);
+
+  const handleLocate = () => {
+    if (!navigator.geolocation) {
+      alert("La géolocalisation n'est pas disponible sur cet appareil.");
+      return;
+    }
+
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (geolocationPosition) => {
+        const coords: [number, number] = [
+          geolocationPosition.coords.latitude,
+          geolocationPosition.coords.longitude,
+        ];
+        mapRef.current?.flyTo(coords, 16);
+        setLocating(false);
+      },
+      () => {
+        alert("Impossible de récupérer votre position. Vérifiez les autorisations de localisation.");
+        setLocating(false);
+      },
+    );
+  };
 
   return (
     <div>
       <MapContainer
+        ref={mapRef}
         center={position ?? DEFAULT_CENTER}
         zoom={position ? 15 : 12}
         scrollWheelZoom
@@ -40,6 +67,14 @@ export default function LocationPicker({ defaultLatitude, defaultLongitude }: Pr
         />
         <ClickHandler onPick={(lat, lng) => setPosition([lat, lng])} />
         {position && <Marker position={position} />}
+        <button
+          type="button"
+          className="geocache-locate-btn"
+          onClick={handleLocate}
+          disabled={locating}
+        >
+          {locating ? "Localisation…" : "📍 Ma position"}
+        </button>
       </MapContainer>
       <span className="admin-list-item-meta">
         {position
